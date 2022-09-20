@@ -8,14 +8,14 @@ import WriteButton from './WriteButton';
 import Failure from './Failure';
 import Download from './Download';
 import Editor from './Editor';
-import {AppContext} from './AppContext';
+import { AppContext } from './AppContext';
 
 export default class WritingApp extends React.Component {
   constructor(props) {
     super(props);
 
-    let {limit, type, hardcore} = this.props;
-
+    let { limit, type, hardcore, nightmode } = this.props;
+    console.log("nightmode", nightmode);
     this.handleStroke = this.handleStroke.bind(this);
 
     this.reset = this.reset.bind(this);
@@ -28,7 +28,7 @@ export default class WritingApp extends React.Component {
       run: false,
       startTime: null,
       fullscreen: false,
-      nightMode: localStorage.getItem("mdwa.night-mode") === "true",
+      nightMode: nightmode !== null ? nightmode : localStorage.getItem("mdwa.night-mode") === "true",
       progress: 0,
       timeSinceStroke: 0,
       danger: false,
@@ -81,7 +81,7 @@ export default class WritingApp extends React.Component {
 
   toggleDanger(on) {
     if (this.state.danger === on) return;
-    this.setState({danger: on});
+    this.setState({ danger: on });
   }
 
   now() {
@@ -99,7 +99,7 @@ export default class WritingApp extends React.Component {
 
   fail() {
     this.stopWriting();
-    this.setState({lost: true})
+    this.setState({ lost: true })
     if (window.plausible) window.plausible('Fail')
   }
 
@@ -169,7 +169,7 @@ export default class WritingApp extends React.Component {
             <Failure />
             <Progress />
             <div className="buttons">
-              {won && <Download text={text} /> }
+              {won && <Download text={text} />}
               <i className="icon-night-mode" onClick={this.toggleNightMode}></i>
               <i className="icon-fullscreen" onClick={this.toggleFullscreen}></i>
             </div>
@@ -184,8 +184,8 @@ export default class WritingApp extends React.Component {
                 />
                 {
                   won
-                  ? <WriteButton small ghost hidePanel label="Start Again" {...{limit, type, hardcore}} />
-                  : <WordCount />
+                    ? <WriteButton small ghost hidePanel label="Start Again" {...{ limit, type, hardcore }} />
+                    : <WordCount />
                 }
               </div>
             )}
