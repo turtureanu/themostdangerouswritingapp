@@ -1,8 +1,12 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
+
 import './styles/main.scss';
 import MDWA from './components/MDWA';
 import registerServiceWorker from './registerServiceWorker';
 
-ReactDOM.render(<MDWA />, document.getElementById('root'));
+const container = document.getElementById('root');
+const root = createRoot(container);
+root.render(<MDWA />);
+
 registerServiceWorker();

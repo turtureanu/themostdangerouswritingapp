@@ -1,23 +1,29 @@
-import React from 'react';
-import classNames from 'classnames';
-import Fullscreen from "react-full-screen";
+import React from "react";
+import classNames from "classnames";
+import { FullScreen, useFullScreenHandle } from "react-full-screen";
 
-import Progress from './Progress';
-import WordCount from './WordCount';
-import WriteButton from './WriteButton';
-import Failure from './Failure';
-import Download from './Download';
-import Editor from './Editor';
-import { AppContext } from './AppContext';
+import Progress from "./Progress";
+import WordCount from "./WordCount";
+import WriteButton from "./WriteButton";
+import Failure from "./Failure";
+import Download from "./Download";
+import Editor from "./Editor";
+import { AppContext } from "./AppContext";
 
-export default class WritingApp extends React.Component {
+const withFullscreenHook = (Component) => {
+  return (props) => {
+    const handle = useFullScreenHandle();
+    return <Component fullscreenHandler={handle} {...props} />;
+  };
+};
+
+class WritingApp extends React.Component {
   constructor(props) {
     super(props);
 
-    let { limit, type, hardcore, nightmode } = this.props;
-    console.log("nightmode", nightmode);
+    let { limit, type, hardcore, nightmode, fullscreenHandler } = this.props;
     this.handleStroke = this.handleStroke.bind(this);
-
+    this.fullscreenHandler = fullscreenHandler;
     this.reset = this.reset.bind(this);
     this.toggleFullscreen = this.toggleFullscreen.bind(this);
     this.toggleNightMode = this.toggleNightMode.bind(this);
@@ -28,7 +34,10 @@ export default class WritingApp extends React.Component {
       run: false,
       startTime: null,
       fullscreen: false,
-      nightMode: nightmode !== null ? nightmode : localStorage.getItem("mdwa.night-mode") === "true",
+      nightMode:
+        nightmode !== null
+          ? nightmode
+          : localStorage.getItem("mdwa.night-mode") === "true",
       progress: 0,
       timeSinceStroke: 0,
       danger: false,
@@ -43,16 +52,16 @@ export default class WritingApp extends React.Component {
   }
 
   componentDidMount() {
-    if (window.plausible) window.plausible('Editor')
+    if (window.plausible) window.plausible("Editor");
   }
 
   startWriting() {
-    if (window.plausible) window.plausible('Start Writing')
+    if (window.plausible) window.plausible("Start Writing");
     this.setState({
       run: true,
       startTime: this.now(),
       timerID: setInterval(() => this.tick(), 100),
-    })
+    });
   }
 
   toggleNightMode() {
@@ -61,7 +70,12 @@ export default class WritingApp extends React.Component {
   }
 
   toggleFullscreen() {
-    this.setState((prevState, props) => ({ fullscreen: !prevState.fullscreen }));
+    if (this.fullscreenHandler.active) this.fullscreenHandler.exit();
+    else this.fullscreenHandler.enter();
+
+    this.setState((prevState, props) => ({
+      fullscreen: !prevState.fullscreen,
+    }));
   }
 
   handleStroke(char, text) {
@@ -71,7 +85,7 @@ export default class WritingApp extends React.Component {
     this.setState({
       text,
       words,
-      timeSinceStroke: 0
+      timeSinceStroke: 0,
     });
   }
 
@@ -92,15 +106,15 @@ export default class WritingApp extends React.Component {
     this.stopWriting();
     this.setState({
       won: true,
-      run: false
-    })
-    if (window.plausible) window.plausible('Win')
+      run: false,
+    });
+    if (window.plausible) window.plausible("Win");
   }
 
   fail() {
     this.stopWriting();
-    this.setState({ lost: true })
-    if (window.plausible) window.plausible('Fail')
+    this.setState({ lost: true });
+    if (window.plausible) window.plausible("Fail");
   }
 
   reset(type, limit, hardcore) {
@@ -115,22 +129,14 @@ export default class WritingApp extends React.Component {
       progress: 0,
       timeSinceStroke: 0,
       danger: false,
-      words: 0
+      words: 0,
     });
     this.editor.current && this.editor.current.reset();
   }
 
   tick() {
-    const {
-      run,
-      words,
-      timeSinceStroke,
-      startTime,
-      fade,
-      type,
-      limit,
-      kill,
-    } = this.state;
+    const { run, words, timeSinceStroke, startTime, fade, type, limit, kill } =
+      this.state;
     if (!run) return;
     const danger = timeSinceStroke >= fade;
     if (timeSinceStroke >= kill) return this.fail();
@@ -142,36 +148,30 @@ export default class WritingApp extends React.Component {
       words,
       progress,
       danger,
-      timeSinceStroke: prevState.timeSinceStroke + 0.1
+      timeSinceStroke: prevState.timeSinceStroke + 0.1,
     }));
   }
 
   render() {
-    const {
-      fullscreen,
-      danger,
-      won,
-      lost,
-      text,
-      nightMode,
-      limit,
-      type,
-      hardcore
-    } = this.state;
-    const appClass = classNames('app', {
-      'night-mode': nightMode,
-      danger: danger
+    const { danger, won, lost, text, nightMode, limit, type, hardcore } =
+      this.state;
+    const appClass = classNames("app", {
+      "night-mode": nightMode,
+      danger: danger,
     });
     return (
-      <Fullscreen enabled={fullscreen} >
+      <FullScreen handle={this.fullscreenHandler}>
         <AppContext.Provider value={this.state}>
-          <div className={appClass} >
+          <div className={appClass}>
             <Failure />
             <Progress />
             <div className="buttons">
               {won && <Download text={text} />}
               <i className="icon-night-mode" onClick={this.toggleNightMode}></i>
-              <i className="icon-fullscreen" onClick={this.toggleFullscreen}></i>
+              <i
+                className="icon-fullscreen"
+                onClick={this.toggleFullscreen}
+              ></i>
             </div>
             {!lost && (
               <div className="content">
@@ -182,16 +182,24 @@ export default class WritingApp extends React.Component {
                   onNightMode={this.toggleNightMode}
                   onFullScreen={this.toggleFullscreen}
                 />
-                {
-                  won
-                    ? <WriteButton small ghost hidePanel label="Start Again" {...{ limit, type, hardcore }} />
-                    : <WordCount />
-                }
+                {won ? (
+                  <WriteButton
+                    small
+                    ghost
+                    hidePanel
+                    label="Start Again"
+                    {...{ limit, type, hardcore }}
+                  />
+                ) : (
+                  <WordCount />
+                )}
               </div>
             )}
           </div>
         </AppContext.Provider>
-      </Fullscreen>
+      </FullScreen>
     );
   }
 }
+
+export default withFullscreenHook(WritingApp);
