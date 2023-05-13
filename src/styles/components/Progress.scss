@@ -1,39 +1,35 @@
-.progress, .app.night-mode .progress
-    {
-    position: fixed;
-    top: 0px;
-    left: 0px;
-    height: 4px;
-    width: 100%;
+.progress,
+.app.night-mode .progress {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  height: 4px;
+  width: 100%;
 
-    & div
-        {
-        height: 4px;
-        background: $blue;
-        box-shadow: -1px 1px 4px fade-out($blue, .5);
-        transition: all .3s ease-out;
-        }
-    &.danger div
-        {
-        background: $red;
-        box-shadow: -1px 1px 4px fade-out($red, .5);
-        }
-    &.won
-        {
-        div
-          {
-          background: $green;
-          height: 8px;
-          box-shadow: 0px 2px 5px fade-out($green, .7);
-          }
-        top: -8px;
-        opacity: 0;
-        transition: all 1s 3s ease-out;
-        }
+  & div {
+    height: 0.5rem;
+    background: $blue;
+    box-shadow: -1px 1px 4px fade-out($blue, 0.5);
+    transition: all 0.3s ease-out;
+    border-radius: 0 2rem 2rem 0;
+  }
+  &.danger div {
+    background: $red;
+    // box-shadow: -1px 1px 4px fade-out($red, 0.5);
+  }
+  &.won {
+    div {
+      background: $green;
+      height: 8px;
+      box-shadow: 0px 2px 5px fade-out($green, 0.7);
     }
+    top: -8px;
+    opacity: 0;
+    transition: all 1s 3s ease-out;
+  }
+}
 
-.app.night-mode .progress div
-    {
-    background: $light-blue;
-    box-shadow: -1px 1px 4px fade-out($light-blue, .5);
-    }
+.app.night-mode .progress div {
+  background: $light-blue;
+  box-shadow: -1px 1px 4px fade-out($light-blue, 0.5);
+}

@@ -6,6 +6,7 @@ import Progress from "./Progress";
 import WordCount from "./WordCount";
 import WriteButton from "./WriteButton";
 import Failure from "./Failure";
+import FontSlider from "./FontSlider"
 import Download from "./Download";
 import Editor from "./Editor";
 import { AppContext } from "./AppContext";
@@ -166,6 +167,10 @@ class WritingApp extends React.Component {
             <Failure />
             <Progress />
             <div className="buttons">
+
+              <span>font size:</span>
+              <FontSlider />
+
               {won && <Download text={text} />}
               <i className="icon-night-mode" onClick={this.toggleNightMode}></i>
               <i
